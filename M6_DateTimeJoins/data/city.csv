@@ -1,0 +1,6 @@
+GEOID,NAME,variable,estimate,moe
+1714000,"Chicago city, Illinois",DP05_0001,2665064,84
+3651000,"New York city, New York",DP05_0001,8335897,NA
+4260000,"Philadelphia city, Pennsylvania",DP05_0001,1567258,NA
+4835000,"Houston city, Texas",DP05_0001,2304414,3368
+4865000,"San Antonio city, Texas",DP05_0001,1472904,73
