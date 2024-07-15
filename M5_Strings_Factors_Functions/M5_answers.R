@@ -31,8 +31,8 @@ View(ehr)
 
 ### Cleaning the name column. ####
 # 1. Take a closer look. 
-ehr %>%
-  arrange(name) %>%
+ehr |>
+  arrange(name) |>
   count(name)
 # Issues observed leading to counting unique patients incorrectly:
 ## 1. Case
@@ -42,77 +42,77 @@ ehr %>%
 ## 5. Typo - comma at end of name
 
 # 1. Case - let's change everything to lower case
-ehr %>%
-  mutate(name = str_to_lower(name)) %>%
+ehr |>
+  mutate(name = str_to_lower(name)) |>
   count(name)
 
 # 2. Trailing spaces - let's trim the white spaces
-ehr %>%
-  mutate(name = str_trim(name)) %>%
+ehr |>
+  mutate(name = str_trim(name)) |>
   count(name)
 
 # The remaining fixes don't have a built in function, so we will use str_replace to match the error
 # 3. Spacing 
-ehr %>% 
+ehr |> 
   # replace two spaces with one
-  mutate(name = str_replace(name, "\\s{2,}", " ")) %>%
+  mutate(name = str_replace(name, "\\s{2,}", " ")) |>
   count(name)
 
 # 4. Middle initial
-ehr %>% 
+ehr |> 
   # replace any space-letter-space with a space 
-  mutate(name = str_replace(name, " \\w ", " ")) %>%
+  mutate(name = str_replace(name, " \\w ", " ")) |>
   count(name)
 # 5. Delete comma
-ehr %>% 
+ehr |> 
   #replace comma with nothing
-  mutate(name = str_replace(name, ",", "")) %>%
+  mutate(name = str_replace(name, ",", "")) |>
   count(name)
 
 # Put it all together
-ehr <- ehr %>%
-  mutate(name = str_to_lower(name)) %>%
-  mutate(name = str_trim(name)) %>%
-  mutate(name = str_replace(name, "\\s{2,}", " ")) %>%
-  mutate(name = str_replace(name, " \\w ", " ")) %>%
+ehr <- ehr |>
+  mutate(name = str_to_lower(name)) |>
+  mutate(name = str_trim(name)) |>
+  mutate(name = str_replace(name, "\\s{2,}", " ")) |>
+  mutate(name = str_replace(name, " \\w ", " ")) |>
   mutate(name = str_replace(name, ",", "")) 
 
 #check your work  
-ehr %>%
+ehr |>
   count(name)
 
 ### Cleaning the city column. ####
-ehr %>%
+ehr |>
   count(city)
 # Issues observed leading to counting unique patients incorrectly:
 ## 1. Case
 ## 2. Inconsistent naming using "city of"
 
 # 1. Case - let's change everything to lower case
-ehr %>%
-  mutate(city = str_to_lower(city)) %>%
+ehr |>
+  mutate(city = str_to_lower(city)) |>
   count(city)
 
 # 2. Drop "city of" - a couple of ways to do this. 
-ehr %>%
+ehr |>
   # Drop "ity of " and any letter preceding it
-  mutate(city = str_replace(city, "[:alpha:]ity of ", "")) %>%
+  mutate(city = str_replace(city, "[:alpha:]ity of ", "")) |>
   count(city)
 
-ehr %>%
+ehr |>
   # use regex function to create a case insensitive pattern
-  mutate(city = str_replace(city, stringr::regex("city of ", ignore_case = TRUE), "")) %>%
+  mutate(city = str_replace(city, stringr::regex("city of ", ignore_case = TRUE), "")) |>
   count(city)
 
 # Put it all together
 ehr <- 
-  ehr %>%
-  mutate(city = str_to_lower(city)) %>%
+  ehr |>
+  mutate(city = str_to_lower(city)) |>
   #since it is already in lower case, don't need to worry about case
   mutate(city = str_replace(city, "city of ", "")) 
   
 #check your work
-ehr %>%
+ehr |>
   count(city)
 
 ### Cleaning the symptom column. ####
@@ -120,14 +120,14 @@ ehr %>%
 # Following tidy data, we should convert this into 3 columns: pain, headache, nausea which have binary response (yes/no)
 # We know there aren't typos in the spelling of the symptoms so we can use str_detect to find the rows with a given symptom
 
-ehr <- ehr %>%
+ehr <- ehr |>
   mutate(pain = ifelse(str_detect(symptoms, "Pain") == TRUE, "Y","N"),
          headache = ifelse(str_detect(symptoms, "Headache") == TRUE, "Y","N"),
          nausea = ifelse(str_detect(symptoms, "Nausea") == TRUE, "Y","N")) 
 
 ### Bonus manipulation: Make a first and last name column
 
-ehr %>%
+ehr |>
   mutate(first_name = str_extract(name, "^\\w+"), 
          last_name = str_extract(name, "\\w+$"), .before = name) 
 
@@ -190,11 +190,11 @@ glimpse(ehr$pain)
 ehr <- readRDS("../Data/ehr.Rds")
 
 # Code chunk to be converted to a function:
-ehr %>%
-  mutate(name = str_to_lower(name)) %>%
-  mutate(name = str_trim(name)) %>%
-  mutate(name = str_replace(name, "\\s{2,}", " ")) %>%
-  mutate(name = str_replace(name, " \\w ", " ")) %>%
+ehr |>
+  mutate(name = str_to_lower(name)) |>
+  mutate(name = str_trim(name)) |>
+  mutate(name = str_replace(name, "\\s{2,}", " ")) |>
+  mutate(name = str_replace(name, " \\w ", " ")) |>
   mutate(name = str_replace(name, ",", "")) 
 
 # 1. Decide:
@@ -214,11 +214,11 @@ ehr %>%
 CleanNameTypos = function(data, namecolumn) {
   
   clean_data <- 
-    data %>%
-      mutate(name_clean = str_to_lower(namecolumn)) %>%
-      mutate(name_clean = str_trim(namecolumn)) %>%
-      mutate(name_clean = str_replace(namecolumn, "\\s{2,}", " ")) %>%
-      mutate(name_clean = str_replace(namecolumn, " \\w ", " ")) %>%
+    data |>
+      mutate(name_clean = str_to_lower(namecolumn)) |>
+      mutate(name_clean = str_trim(namecolumn)) |>
+      mutate(name_clean = str_replace(namecolumn, "\\s{2,}", " ")) |>
+      mutate(name_clean = str_replace(namecolumn, " \\w ", " ")) |>
       mutate(name_clean = str_replace(namecolumn, ",", "")) 
   
   return(clean_data)
