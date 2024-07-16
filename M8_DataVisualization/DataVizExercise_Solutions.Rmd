@@ -1,0 +1,184 @@
+---
+title: 'Data Visualization: Group Solutions'
+author: "SISMID 2024"
+date: ""
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+```{r}
+library(tidyverse)
+
+data <- read_csv("linelist.csv") |>
+  mutate(duration = date_outcome - date_onset)
+```
+
+Below are solutions for the different visualization challenges. As we saw, there are many paths to the same outcome. Here is just one. 
+
+# Problem 1
+
+Work with your team to create a polished `ggplot2` boxplot.
+
+Use 1-2 of the following graphical arguments in your geom_boxplot function to modify the appearance of the plots. Read the documentation for `geom_boxplot()` to understand how to use them.
+
+* `fill =`
+* `color =`
+* `alpha =`
+* `notch =`
+* `outlier.color =`
+* `outlier.fill =`
+* `outlier.shape =`
+
+
+Use 2-3 of the following graphical functions to improve your plot (remember to put each on its own line and connect them with a +):
+
+
+* `xlab()`
+* `ylab()`
+* `ggtitle()`
+* `theme_XXX()` (Try out different themes by placing different themes after the underscore, the full list can be found here: https://ggplot2.tidyverse.org/reference/ggtheme.html)
+
+Challenge:
+
+* `theme()` This function lets you set specific components of the theme of a plot. See if you can tweak these to further improve your plot.
+
+
+
+```{r}
+
+fill <- "#4271AE" #color of box fill
+line <- "#1F3552" #color of box outline
+
+
+
+#plot
+ggplot(data, aes(x=duration, y=outcome)) +  #indicate the data, x and y values
+  geom_boxplot(fill=fill, color=line, alpha=0.5, outlier.colour = fill) + #add box plot layer
+  xlab("Duration of Infection (Days)") + #label x axis
+  ggtitle("Infection Durations Separated by Ultimate Outcome") + #add title
+  theme_minimal() # Change the theme
+
+```
+
+## Additional Resources:
+
+ * [Cheat Sheet](https://rstudio.github.io/cheatsheets/html/data-visualization.html)
+ * [Data Carpentry ggplot2 tutorial](https://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html)
+ * A very detailed tutorial is on [ZevRoss](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/). 
+ * A more formal guide is in the [R for Data Science](http://r4ds.had.co.nz/data-visualisation.html) visualization chapter. 
+ 
+# Problem 2: Scatter Plot
+
+Create a polished scatterplot of the relationship between age at infection and duration of infection using the function `geom_point()` and add a trendline to the plot using the function `geom_smooth()`.
+
+
+```{r ggscatter, echo=TRUE}
+
+ggplot(data, aes(x = age, y = duration, color = outcome)) + #set data, x,y and col values
+        geom_point() + #add points layer
+        xlab("Age (yrs)")+
+        ylab("Duration of Infection (days)")+
+        theme_minimal()+ # Change Theme
+        theme(axis.title = element_text(face = "bold", size=18)) #change font of both axis labels
+
+```
+
+***Challenge: Change the color or shape of the points so that they represent the outcome of infection.***
+
+# Problem 3: Group Challenge
+
+For the final problem you will work to produce a more complicated figure using some of the more advanced/specialized functions of ggplot. Please work in your group to create a polished figure according to the specifications for your group below. You can visualize any relationship in the line-list data, but keep in mind that certain types of plots are better for visualizing some data types and relationships than others.
+
+## Group 1:  Multi-panel Plots
+
+We often want to visualize a relationship between variables in multiple groups side by side. We can facet our data into multiple panels to do this. Create a plot using the linelist dataset that incorporates multiple panels. Use one or more of the following graphical functions:
+
+* `facet_wrap()`
+* `facet_grid()`
+
+```{r ggfacet, echo=TRUE, fig.height=10}
+
+ggplot(data, aes(x = age, y = duration)) + #set data, x,y and col values
+        geom_point() + #add points layer
+        xlab("Age (yrs)")+
+        facet_wrap(~outcome)+# Separate into panels by outcome
+        ylab("Duration of Infection (days)")+
+        theme_bw() +# Change Theme
+        theme(axis.title = element_text(face = "bold", size=18), strip.text = element_text(size = 18)) #change font of both axis labels
+
+```
+
+## Group 2: Violin Plots
+
+Violin plots are a stylized version of a boxplot which contain slightly more information about the data distribution. Create a violin plot using the linelist dataset. Use one or more of the following graphical functions:
+
+*`geom_violin`
+*`geom_jitter`
+
+
+
+```{r ggviolin, echo=TRUE}
+
+ggplot(data, aes(duration, outcome)) + #set x and y data
+      geom_violin(aes(fill = outcome)) + #plot as violin 
+      scale_fill_brewer(palette="Set3")+ #set colors using color brewer
+      geom_jitter(alpha = 0.05) + # Add jittered points and make them faint
+      theme_classic()+ #Set a new theme
+      theme(axis.title = element_text(face = "bold", size=20)) #change font of axis labels
+
+
+
+```
+
+## Group 3: Bubble  Plots
+
+Bubble plots
+
+Create a bubble plot using the linelist dataset. Use one or more of the following graphical functions:
+* `geom_point()`
+* `aes(size = )` (Remember that this function has to go inside another function, see above for examples)
+* `scale_size()`
+
+
+```{r ggbubble, echo=TRUE}
+
+ggplot(data, aes(x = age, y = duration, size = ct_blood)) + #set data, x,y and col values
+        geom_point(alpha = 0.05) + #add points layer
+        xlab("Age (yrs)")+
+        ylab("Duration of Infection (days)")+
+        scale_size(name = "Blood Count", range = c(.1, 10)) +
+        theme_bw() +# Change Theme
+        theme(axis.title = element_text(face = "bold", size=18), strip.text = element_text(size = 18)) #change font of both axis labels
+
+```
+
+## Group 4: Time Series Plots
+
+Time series plots are specialized versions of line/dot plots.
+
+Create a time series plot using the linelist dataset. You may want to use some of your date and tidy data skills to summarize the data by date first. Use one or more of the following graphical functions:
+
+* `geom_line()`
+
+
+Challenge: Include multiple time series in one plot (e.g. grouped by over or under 10 years old)
+
+```{r ggtimeseries, echo=TRUE}
+library(cowplot) # includes theme_half_open()
+
+caseSums <- data |>
+  mutate(over10 = age>10) |>
+  group_by(date_hospitalisation, over10) |>
+  summarize(Hospitalizations = n())
+
+ggplot(caseSums, aes(x = date_hospitalisation, y = Hospitalizations, color = over10))+
+  geom_line(size = .75)+ # Plot line and set thickness
+  theme_half_open()+ # Choose theme
+  xlab("Date") + # Label x axis
+  ylab("Number of Hospitalizations") # Label y axis
+
+
+```
+
