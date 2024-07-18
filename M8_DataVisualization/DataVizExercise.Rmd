@@ -15,9 +15,9 @@ data <- read_csv("linelist.csv") |>
 ```
 
 
-# Introduction
+# Part 1: Boxplot
 
-We've explored the `linelist.csv` dataset. You may have made a boxplot to explore these data (or other data) using base R graphics. That would look like this:
+In this lesson we'll be working with the `linelist.csv` dataset. You may have made a boxplot to explore data using base R graphics. That would look like this:
    
 ```{r boxplot}
 
@@ -81,7 +81,7 @@ Use 2-3 of the following graphical functions to improve your plot (remember to p
 
 * `theme()` This function lets you set specific components of the theme of a plot. See if you can tweak these to further improve your plot.
 
-```{r}
+```{r Problem 1}
 
 ggplot(data = data, aes(x = duration, y = outcome)) +
   geom_boxplot()
@@ -95,18 +95,59 @@ ggplot(data = data, aes(x = duration, y = outcome)) +
  * A very detailed tutorial is on [ZevRoss](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/). 
  * A more formal guide is in the [R for Data Science](http://r4ds.had.co.nz/data-visualisation.html) visualization chapter. 
 
-# Problem 2: Scatter Plot
+# Part 2: Scatter Plots
 
-Create a polished scatterplot of the relationship between age at infection and duration of infection using the function `geom_point()` and add a trendline to the plot using the function `geom_smooth()`.
+We also use scatterplots A LOT to visualize data and communicate our findings. There isn't a "geom_scatter()" function in R. Instead we use `geom_point()`
+
+```{r ggscatter}
+
+data |>
+  ggplot(aes(x = ct_blood, y = age))+
+  geom_point()
+```
 
 
-```{r ggscatter, echo=TRUE}
+## Problem 2: Polished Scatter Plot
+
+1. Create a polished scatterplot of the relationship between age at infection and duration of infection using the function `geom_point()`
+
+2. Add a trendline to the plot using the function `geom_smooth()`.
+
+3. Add x and y labels and a chart title.
+
+***CHALLENGE: Try changing the color of the points to blue and the line to red.***
+
+
+```{r Problem 2, echo=TRUE}
 
 ```
 
 ***Challenge: Change the color or shape of the points so that they represent the outcome of infection.***
 
-# Problem 3: Group Challenge
+# Part 3: Bar plots
+
+Unlike boxplots and scatterplots, to create a bar-plot we have to give R summaries of our data (usually means). So we'll combine our dplyr skills with our ggplot skills to make a beautiful barplot!
+
+```{r}
+summary_data <- data |>
+  group_by(age_cat) |>
+  summarize(mean_duration = mean(duration, na.rm = T))
+
+summary_data
+```
+
+# Problem 4: Make a bar plot!
+
+use the summary_data to create a boxplot. The geometry for a bar chart of your data values is (somewhat confusingly) `geom_col()`
+
+```{r Problem 4}
+summary_data |>
+
+```
+
+***CHALLENGE: Make a bar plot that is grouped by both age category and gender. You'll need to start with a new grouping and summarizing processs***
+
+# Problem 5: Group Challenge
 
 For the final problem you will work to produce a more complicated figure using some of the more advanced/specialized functions of ggplot. Please work in your group to create a polished figure according to the specifications for your group below. You can visualize any relationship in the line-list data, but keep in mind that certain types of plots are better for visualizing some data types and relationships than others.
 
@@ -122,16 +163,18 @@ We often want to visualize a relationship between variables in multiple groups s
 
 ```
 
-## Group 2: Violin Plots
+## Group 2: Histograms and Violin Plots
+
+Histograms are plots of the frequency of a continuous variable in a dataset. They can be useful for visualizing the shape of data distributions.
 
 Violin plots are a stylized version of a boxplot which contain slightly more information about the data distribution. Create a violin plot using the linelist dataset. Use one or more of the following graphical functions:
 
+*`geom_histogram`
 *`geom_violin`
-*`geom_jitter`
 
 
 
-```{r ggviolin, echo=TRUE}
+```{r gghist, echo=TRUE}
 
 
 
