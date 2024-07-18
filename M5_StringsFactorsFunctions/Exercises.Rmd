@@ -1,0 +1,331 @@
+---
+title: "Strings, Factors, and Functions"
+author: ""
+date: "2024-07-17"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
+#load packages
+library(tidyverse)
+```
+
+
+# Regular expressions 
+
+The regular expressions functions we'll work with are part of the `stringr` library. You can either load it or the `tidyverse` library. I recommend loading the `tidyverse` library since it loads all of the packages that are part of the tidyverse. 
+
+Links to useful resources: 
+
+ - RStudio regex addin: https://www.garrickadenbuie.com/project/regexplain/
+ - library website: https://stringr.tidyverse.org/index.html 
+
+```{r regex practice}
+# this string contains all the patterns that the "Give it a try" slide prompts
+test_string <- c("Apple","pineApple" ,"banana", "2323!","ID", "Regex?", "Coconut")
+
+# Test your regex expression by using the str_view function
+# hint: str_view(test_string, [ADD CODE])
+```
+
+```{r regex practice answers}
+str_view(test_string, "A")
+str_view(test_string, "[:digit:]")
+str_view(test_string, "[:upper:]$")
+str_view(test_string, "[?]")
+str_view(test_string, "([:alpha:][:alpha:])\\1")
+```
+
+## Exercise
+
+We will be working with simulated electronic health record (ehr) data. The data contains admission date (admit_date), the patient’s name (name), the patient’s date of birth (dob), the patient’s address (address), the city the patient lives in (city), and column that contains the symptoms each patient was experiencing at admission (symptoms). 
+
+```{r ehr data, echo=FALSE}
+#load data
+ehr <- read_rds("data/ehr.Rds")
+# let's take a look at the data, what are the column names?
+glimpse(ehr)
+#look a bit closer by using
+view(ehr)
+
+```
+
+Take a moment to jot down the inconsistencies in the name, address, city, and symptoms columns that might needs some data wrangling attention. 
+
+### Part A: Name 
+
+For this part of the exercise we will focus on the name column. The inconsistencies I identified were:
+
+  1. Case
+  2. Trailing spaces
+  3. Spacing between first and last name
+  4. Middle initial
+  5. Typo - comma at end of name
+  
+  Let's work through each of these individually, and then put it together in one long pipe like you might do during a data wrangling pipeline. 
+  
+Replace the [ADD CODE] with the appropriate function, argument, or data.
+
+```{r clean name}
+# 1. Case - let's change everything to lower case
+ehr |>
+  mutate(name = [ADD CODE](name)) |>
+  count(name)
+
+# 2. Trailing spaces - let's trim the white spaces
+ehr |>
+  mutate(name = [ADD CODE](name)) |>
+  count(name)
+
+# The remaining fixes don't have a built in function, so we will use str_replace to match the error
+# 3. Spacing 
+ehr |> 
+  # replace two spaces with one
+  mutate(name = str_replace(name, [ADD CODE])) |>
+  count(name)
+
+# 4. Middle initial
+ehr |> 
+  # replace any space-letter-space with a space 
+  mutate(name = str_replace(name, [ADD CODE])) |>
+  count(name)
+# 5. Delete comma
+ehr |> 
+  #replace comma with nothing
+  mutate(name = str_replace(name,[ADD CODE])) |>
+  count(name)
+
+```
+  
+  
+Once you are able to run the previous code chunk without errors, create a block of verbs (i.e. copy and past from above) to do all of the cleaning in one step below.
+
+```{r clean name 2}
+
+# Put it all together
+ehr_clean <- ehr |>
+  mutate(name = str_to_lower(name)) |>
+  [ADD CODE]
+
+#check your work  
+ehr_clean |>
+  count(name)
+
+```
+
+### Part B: City
+
+We will repeat the same process, but for the city column. Take a moment to identify all of the inconsistencies in the city column. 
+
+```{r}
+#print just the city column
+ehr$city
+```
+
+The inconsistencies I identified were:
+ 
+ 1. Case
+ 2. Inconsistent naming using "city of"
+ 
+ Like above replace the [ADD CODE] to get functioning code
+ 
+```{r clean city}
+# 1. Case - let's change everything to lower case
+ehr |>
+  mutate([ADD CODE]) |>
+  count(city)
+
+# 2. Drop "city of" - a couple of ways to do this. 
+ehr |>
+  # Drop "ity of " and any letter preceding it
+  mutate(city = [ADD CODE](city, [ADD CODE], "")) |>
+  count(city)
+# -OR- 
+ehr |>
+  # use regex function to create a case insensitive pattern
+  mutate(city = str_replace(city, stringr::regex("city of ", ignore_case = TRUE), "")) |>
+  count(city)
+
+```
+ 
+Again, put it into a single block. Does removing "city of" become easier? 
+
+```{r clean city 2}
+# Put it all together
+ehr_clean <- 
+  ehr |>
+  [ADD CODE]
+  #since it is already in lower case, don't need to worry about case
+  mutate(city = str_replace(city, "city of ", "")) 
+  
+#check your work
+ehr_clean |>
+  count(city)
+```
+
+### Part C: Symptoms
+
+What inconsistencies are in the symptoms column?
+
+```{r}
+# yet another way to look at the data
+str(ehr)
+```
+
+ This column contains the response from a check box type question, but with some funky formatting. The options were: pain, headache, and nausea. Following tidy data, we should convert this into 3 columns: pain, headache, nausea which have binary response (yes/no). We know there aren't typos in the spelling of the symptoms so we can use str_detect to find the rows with a given symptom.
+ 
+```{r symptoms}
+ehr_clean <- 
+  ehr |>
+  mutate(pain = ifelse(str_detect(symptoms, "Pain") == TRUE, "Y","N"),
+         headache = [ADD CODE],
+         nausea = [ADD CODE]) 
+```
+
+### Bonus manipulation: Make a first and last name column
+
+```{r}
+
+ehr |>
+  mutate(first_name = [ADD CODE], 
+         last_name = [ADD CODE]) 
+
+```
+
+
+
+
+# Factors
+
+The tidyverse library that manipulates factors is called forcats. How can you check to see if forcats was loaded as part of the `library(tidyverse)` call?
+
+ Links to useful resources: 
+ 
+  - library website: https://forcats.tidyverse.org/
+  
+## Exercise
+
+We are starting with the `ehr_clean` data set that was created in the symptoms code chunk above. If you did not get to that code chunk, prompt us for a quick work around. You will not be able to complete this exercise without first completing or modifying Part C above.
+
+Goals: 
+  A) Want pain to be a factor with the levels in order of: NA, N, Y.
+  B) Want pain to be reduced to 2 factors with the levels in order of: Y, N or NA 
+
+The general work flow is:
+
+1. Determine current data structure
+2. Test strategies to convert data structure
+3. Implement best strategy
+4. Check your work
+
+Like before, the first step is to determine the current state of our data. Are any of the `ehr_clean` columns factors?
+
+```{r is factor}
+# 1. Let's explore the ehr data structure. Are any columns factors?
+str(ehr_clean)
+# -OR-  ask if a specific col is a factor using base R syntax
+is.factor(ehr_clean$pain)
+#the output is FALSE, so we need to convert all of the logical columns to factors
+```
+
+```{r}
+# 2. If pain is converted to a factor, what would be the levels?
+levels(as_factor([ADD CODE]))
+#Based on the output the NA is being ignored, but we want to keep it as a factor for future data visualizations. 
+```
+
+```{r}
+# 3. Convert to factors but set NA as a level
+ehr_clean <- 
+  ehr_clean |> 
+  #function to convert to factor and keep NA as a level  
+  mutate(pain = fct_na_value_to_level([ADD CODE]))
+```
+
+We are half way to our goals. Pain is not a factor with 3 levels. What are they? 
+
+```{r goal A}
+# Goal A: Put the levels in the correct order
+# Use base R to see what the current order is. Does it need to be changed? 
+levels(ehr_clean$pain)
+
+# We want an output that reads NA, "N", "Y", so we need to reoder the factors
+ehr_gA <- 
+  ehr_clean |>
+    mutate(pain = fct_relevel(pain, c(NA, "N","Y")))
+
+# check to make sure the reorder worked
+levels(ehr_gA$pain)
+
+```
+
+```{r goal B}
+# Goal B: Combine the N and NA levels in the correct order
+ehr_gB <- 
+  ehr_clean |> 
+    mutate(pain = fct_collapse(pain, NorNA = [ADD CODE])) |>
+  #reorder so Y is first
+    mutate(pain = [ADD CODE])
+  
+# check to make sure the reorder worked
+glimpse(ehr_gB$pain)
+```
+
+
+# Functions
+
+Functions are not really part of the tidyverse, but are important for repetitive data wrangling. Time permitting, complete the following exercise.
+
+## Exercise
+
+Suppose you'll be receiving monthly electronic health record data. This seems like a great opportunity to automate some of the name cleaning work we did at the beginning of the module. Convert the code chunk below to a function. The name column is not consistently named between months and can be named : name, Name, names, NAMES, FirstLastName, etc. 
+
+```{r}
+# load that data again to start with a messy data set 
+ehr <- readRDS("data/ehr.Rds")
+
+# Code chunk to be converted to a function:
+ehr |>
+  mutate(name = str_to_lower(name)) |>
+  mutate(name = str_trim(name)) |>
+  mutate(name = str_replace(name, "\\s{2,}", " ")) |>
+  mutate(name = str_replace(name, " \\w ", " ")) |>
+  mutate(name = str_replace(name, ",", "")) 
+```
+
+```{r my first function}
+# Workflow: 
+# 1. Decide:
+#    - which arguments are needed
+#    - on the function name (google R style guides if you're stuck)
+
+# 2. Write and test
+# 3. Add documentation
+
+#' Remove white space, middle initials, commas, and convert to lower case
+#'
+#' @param data the raw ehr data 
+#' @param [ADD CODE] 
+#'
+#' @return [ADD CODE]
+
+Clean_Name_Typos = function([ADD CODE]) {
+  
+  clean_data <- 
+    data |>
+    [ADD CODE]
+  
+  return(clean_data)
+}
+
+```
+
+**Post script**
+
+Does your code follow the tidyverse style guide? What is a quick way to nicely format the code? What was changed?
