@@ -1,0 +1,131 @@
+---
+title: "Purrr and TidyModels Exercise"
+output: html_document
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+df <- read_csv("linelist.csv") |>
+  mutate(duration = as.numeric(date_outcome - date_onset),
+         outcome = as.factor(outcome)) |>
+  drop_na(outcome)
+```
+
+
+# Introduction
+
+So you've loaded and processed your data, you've made some visualizations to look at different patterns, now you want to fit some statistical models for the purpose of hypothesis testing and/or prediction. In this module we're going to learn a tidy framework for linear and logistic regression models, as these are some of the most widely used, but most of the skills that we'll learn here will be generalizable to many types of data modeling. **We will use the linelist dataset for this exercise.**
+
+# Part 1: Tidying model output
+
+You may have run a linear regression in R before. If we were interested in the relationship between age and duration of infection would do that like this:
+   
+```{r lm}
+
+model <- lm(duration ~ age, data =df) # Fit linear model using a formula
+
+summary(model) # Print a summary of the model
+
+```
+This output is formatted for a human to read easily and contains lots of details. Often we may want to store our model estimates and statistics in a simpler, more machine readable format. We can use the `tidy()` function to do just that.
+
+```{r}
+
+tidy(model) # Tidy the model estimates and statistics
+```
+
+
+# Part 2 Fitting Models Flexibly (The `parsnip` Package)
+
+We can get a lot of use out of tidying up the outputs of base R modeling functions. But we can also benefit from the highly flexible tidymodel fitting functions in the parsnip package!
+
+The main advantage of the functions that you'll learn here is flexibility. You can pivot a whole modeling workflow from typical linear regression to a bayesian fitting framework, to a regression tree approach with a change of just a few characters. You can also take a modeling workflow and immediately apply it directly to another dataset.
+
+When fitting a tidymodel. You start by defining the type of model that you'd like to fit. The code below tells R that we want to fit a linear regression model, and we want to use the typical linear model fitting baked into R.
+
+
+```{r}
+lm_model <- 
+  linear_reg() |> # Set up a linear regression model
+  set_engine("lm") # Specify the "engine" that you want to use to fit the model (We'll come back to this later)
+
+
+lm_model
+
+```
+
+Next we will set up a workflow that tells R how to use that model. In particular we will describe a formula that we want to model.
+
+```{r}
+lm_workflow <- 
+  workflow() |> # Initialize your modeling workflow
+  add_model(lm_model) |> # Add your linear regression model
+  add_formula(duration ~ age) # Provide a formula for the model to fit
+
+
+lm_workflow
+
+
+```
+
+Finally we get to apply this workflow to some real data!
+
+```{r}
+fit_1 <- fit(lm_workflow, df) # Fit your modeling workflow to a dataset
+
+fit_1 |>
+    extract_fit_engine() |> # Extract your fit model
+  tidy() # Tidy the output of the model
+
+```
+
+
+## Problem 1: Make your own tidy model
+
+Repurpose the code above to fit a new linear regression model. You could change the response variable, or include additional predictor variables. Just make sure to retype (or copy-paste and modify) all the code above in order to make your new model.
+
+```{r}
+
+
+```
+
+## Problem 2: Try Logistic Regression
+
+Logistic regression is used when your response variable is binary (success/failure, survived/died). Build a logistic regression model in tidymodels and fit it to the outcome of the infection.
+
+The model function for logistic regression is `logistic_reg()`, you'll also have to pick a new engine because the lm engine is just for linear regression. Use `?logistic_reg()` to read about the possible engines and choose one.
+
+```{r}
+
+
+
+
+```
+
+
+# Part 3: Switching your model engine
+
+One of the main strengths of the tidymodels framework is its flexibility. One version of that flexibility is being able to swap out the fitting method with just a few keystrokes. Imagine you have a colleague who is really interested in Bayesian fitting methods and would prefer that you use them. You can do that in tidymodels just by changing the engine of the model
+
+```{r}
+lm_model <- 
+  linear_reg() |> # Set up a linear regression model
+  set_engine("stan") # Choose a Bayesian engine for your model
+
+lm_workflow <- 
+  workflow() |> # Initialize workflow
+  add_model(lm_model) |> # Add your model
+  add_formula(duration ~ age + outcome) # Specify Formula
+
+fit(lm_workflow, df) |> # Fit workflow to data
+    extract_fit_engine() |> # Extract your fit
+  summary() # Summarize your fit model
+
+```
+
