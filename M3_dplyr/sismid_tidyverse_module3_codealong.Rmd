@@ -1,0 +1,257 @@
+---
+title: "SISMID Tidyverse Module 3 Code-along"
+output: html_document
+date: "2024-07-18"
+---
+
+```{r load packages}
+library(tidyverse)
+library(nycflights13)
+
+flights <- nycflights13::flights
+weather <- nycflights13::weather
+```
+
+## FILTER
+
+Explain what each of line of code is accomplishing
+```{r filter 1}
+jfk_flights <- filter(flights, origin == "JFK")
+nyc_am_flights <- filter(flights, dep_time < 1200)
+```
+
+
+Complete these lines of code to filter to all major airports in Texas (IAH, DFW, HOU)
+```{r filter 2}
+flights %>% filter(dest == "IAH", [ADD CODE HERE])
+flights %>% filter(dest %in% c("IAH"), [ADD CODE HERE]))
+```
+
+
+## SLICE
+
+Explain what this line of code is doing
+```{r slice 1}
+flights %>% slice(500:510)
+```
+
+
+Complete these lines of code to view the first 6 rows and the last 12 rows of flight data
+```{r slice 2}
+flights %>% slice_head([ADD CODE HERE])
+flights %>% slice_tail([ADD CODE HERE])
+```
+
+
+## ARRANGE
+
+What is this line of code doing?
+```{r arrange 1}
+flights %>% arrange(dep_time)
+```
+
+How can we alter this code to arrange flights by departure time, largest to smallest?
+```{r arrange 2}
+flights %>% arrange(desc([ADD CODE HERE]))
+```
+
+Write a statement that arranges the flight data by arrival time in descending order, departure time in ascending order, and day in ascending order
+```{r arrange3}
+flights %>% [ADD CODE HERE]
+```
+
+
+## PRACTICE EXERCISES
+
+Write code to answer each question
+
+1. How many flights departed from JFK on December 3rd?
+
+```{r practice 1.1}
+flights %>% filter([ADD CODE HERE])
+```
+
+2. How many flights went to ATL in March? What was the shortest flight time?
+
+```{r practice 1.2}
+flights %>% [ADD CODE HERE] %>%
+            arrange([ADD CODE HERE])
+```
+
+3. How many flights are missing arrival delay data?
+
+```{r practice 1.3}
+flights %>% [ADD CODE HERE](is.na([ADD CODE HERE]))
+```
+
+4. How many flights leaving LGA reported a departure delay over 30 minutes?
+
+```{r practice 1.4}
+flights %>% [ADD CODE HERE]
+```
+
+5. What was the destination of the flight that had the smallest arrival delay, but traveled the longest distance?
+
+```{r practice 1.5}
+flights %>% [ADD CODE HERE]
+```
+
+
+## SELECT
+
+Complete this code to select the origin, destination, and distance columns
+```{r select 1}
+flights %>% select([ADD CODE HERE])
+```
+
+Complete this code to select the columns 13, 6, 2, and 8
+```{r select 2}
+flights %>% select([ADD CODE HERE]
+```
+
+Complete this code to select all columns *except* tail number and time/hour
+```{r select 3}
+flights %>% select(-[ADD CODE HERE], -[ADD CODE HERE])
+```
+
+What is this code doing?
+```{r select 4}
+flights %>% select(contains("dep"))
+```
+
+
+## MUTATE
+
+What is this code doing?
+```{r mutate 1}
+flights %>% mutate(speed = distance/air_time*60)
+```
+
+Write a line of code that creates a new column called kilometers, which is calculated by multiplying the distance in miles by 1.609
+```{r mutate 2}
+flights %>% mutate([ADD CODE HERE])
+```
+
+
+## RELOCATE
+
+Complete this line of code to relocate any columns with the string "wind" to appear after the precipitation column
+```{r relocate 1}
+weather %>% relocate(contains([ADD CODE HERE]), .after = [ADDS CODE HERE])
+```
+
+## RENAME
+
+Complete this code to rename the dewp column to dew point
+```{r rename 1}
+weather %>% rename([ADD CODE HERE] = [ADD CODE HERE])
+```
+
+
+## PRACTICE EXERCISES
+
+1. Make a table that contains data on flight arrivals to SFO from EWR for the 15th day of each month
+
+```{r practice 2.1}
+flights %>% filter(origin == [ADD CODE HERE] & dest == [ADD CODE HERE] & [ADD CODE HERE]) %>%
+            select(contains([ADD CODE HERE]))
+```
+
+2. Make a table of weather observations where the temperature exceeded 90 degrees, but with only origin, date/time, and temp variables
+
+```{r practice 2.2}
+weather %>% [ADD CODE HERE] %>%
+            select([ADD CODE HERE])
+```
+
+3. Make a table of flights that departed early and arrived early, \
+  shows only departure delay, arrival delay, and distance with the largest arrival delay first, \
+  create a new column called `total_delay` that adds together the departure and arrival delays and     put it in front of the distance column, and \
+  rename the departure and arrival delay columns to fully spell out departure/arrival
+  
+. . . 
+  
+```{r practice 2.3}
+flights %>% filter([ADD CODE HERE]) %>%
+            mutate(total_delay = [ADD CODE HERE]) %>%
+            select([ADD CODE HERE]) %>%
+            rename([ADD CODE HERE]) %>%
+            [ADD CODE HERE]
+```
+
+
+## GROUP_BY + SUMMARIZE
+
+What is this code doing?
+```{r group summarize 1}
+weather %>% group_by(origin, month) %>%
+            summarize(mean_temp = mean(temp, na.rm = TRUE))
+```
+
+Complete this code to create a table that counts the number of flights from each origin
+```{r group summarize 2}
+flights %>% group_by([ADD CODE HERE]) %>%
+            summarize(count = [ADD CODE HERE])
+```
+
+
+## PRACTICE EXERCISES
+
+1. How many flights departed on the busiest day of the year for each airport?
+
+**[HINT: check out the function `top_n()`]**
+```{r practice 3.1}
+flights %>% group_by(origin, [ADD CODE HERE]) %>%
+            summarize(count = [ADD CODE HERE]) %>%
+            group_by([ADD CODE HERE]) %>%
+            top_n([ADD CODE HERE])
+```
+
+2. What was the coldest day of the year for each airport? How many flights departed each airport on that day?
+
+```{r practice 3.2}
+weather %>% group_by([ADD CODE HERE], month, day) %>%
+            summarize(min_temp = [ADD CODE HERE]) %>%
+            group_by([ADD CODE HERE]) %>%
+            filter(min_temp == [ADD CODE HERE])
+
+flights %>% filter(day == [ADD CODE HERE] & month == [ADD CODE HERE]) %>%
+            group_by([ADD CODE HERE]) %>%
+            summarize(count = [ADD CODE HERE])
+```
+
+3. Which destination airport does each NYC airport fly to most often?
+
+```{r practice 3.3}
+flights %>% group_by([ADD CODE HERE]) %>%
+            summarize([ADD CODE HERE]) %>%
+            [ADD CODE HERE]
+```
+
+4. What is the total monthly rainfall at each NYC airport in 2023? Which month is the rainiest?
+
+```{r practice 3.4}
+[ADD CODE HERE] %>% group_by([ADD CODE HERE]) %>%
+                    summarize(total_prcp = [ADD CODE HERE]) %>%
+                    pivot_wider(names_from = [ADD CODE HERE], values_from = [ADD CODE HERE])
+```
+
+5. What is the longest recorded flight departure delay for each airport?
+
+```{r practice 3.5}
+flights %>% [ADD CODE HERE] %>%
+            summarize([ADD CODE HERE])
+```
+
+6. How many flights departed more than 30 minutes late from each airport? Which carrier was most commonly delayed more than 30 minute?
+
+```{r practice 3.6}
+flights %>% [ADD CODE HERE] %>%
+            group_by([ADD CODE HERE]) %>%
+            summarize([ADD CODE HERE])
+
+flights %>% [ADD CODE HERE] %>%
+            group_by([ADD CODE HERE]) %>%
+            summarize([ADD CODE HERE]) %>%
+            [ADD CODE HERE]
+```
